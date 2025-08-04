@@ -1,3 +1,4 @@
+import { Download } from 'lucide-react';
 import { Project } from '../../types';
 import { StatusBadge } from '../common/StatusBadge';
 
@@ -7,6 +8,13 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ project, onClick }: ProjectCardProps) {
+  const handleDownload = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click navigation
+    // Simulated download action
+    console.log(`Downloading results for ${project.reference}`);
+    alert(`Downloading results for ${project.reference}`);
+  };
+
   return (
     <div
       onClick={onClick}
@@ -21,6 +29,17 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
           <p>{project.documentCount} documents</p>
           <p>Created: {project.created}</p>
         </div>
+        {project.status === 'completed' && (
+          <div className="mt-4">
+            <button
+              onClick={handleDownload}
+              className="w-full inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Download Results
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
