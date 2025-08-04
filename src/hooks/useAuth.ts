@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { AuthState, User } from '../types';
 
 const AUTH_STORAGE_KEY = 'invoice_processor_auth';
