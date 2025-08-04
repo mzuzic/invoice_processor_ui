@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from './hooks/useAuth';
 import { LoginScreen } from './components/auth/LoginScreen';
 import { ProjectHub } from './components/projects/ProjectHub';

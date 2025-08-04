@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Loader2, LogOut } from 'lucide-react';
 import { Project } from '../../types';
 import { apiService } from '../../services/api';

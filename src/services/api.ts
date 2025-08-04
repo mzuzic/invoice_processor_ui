@@ -2,7 +2,6 @@ import { Project, Document } from '../types';
 import { config } from '../config';
 
 class ApiService {
-  private baseUrl = config.apiUrl;
 
   async fetchProjects(): Promise<Project[]> {
     // Simulated API call - replace with actual implementation
@@ -55,7 +54,7 @@ class ApiService {
               id: '2',
               filename: 'invoice2.pdf',
               type: 'Invoice',
-              vendor: null,
+              vendor: undefined,
               status: 'processing',
               jobId: 'job-2'
             }
@@ -65,7 +64,7 @@ class ApiService {
     });
   }
 
-  async uploadFiles(projectId: string, files: File[]): Promise<Document[]> {
+  async uploadFiles(_projectId: string, files: File[]): Promise<Document[]> {
     // Simulated file upload
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -81,7 +80,7 @@ class ApiService {
     });
   }
 
-  async startProcessing(projectId: string): Promise<void> {
+  async startProcessing(_projectId: string): Promise<void> {
     // Simulated processing start
     return new Promise((resolve) => {
       setTimeout(() => {
