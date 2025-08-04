@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Loader2, LogOut } from 'lucide-react';
 import { Project } from '../../types';
 import { apiService } from '../../services/api';
 import { ProjectCard } from './ProjectCard';
 import { CreateProjectModal } from './CreateProjectModal';
+import { useAuth } from '../../hooks/useAuth';
 
 interface ProjectHubProps {
   onNavigateToProject: (projectId: string) => void;
-  onLogout: () => void;
 }
 
-export function ProjectHub({ onNavigateToProject, onLogout }: ProjectHubProps) {
+export function ProjectHub({ onNavigateToProject }: ProjectHubProps) {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -47,7 +50,10 @@ export function ProjectHub({ onNavigateToProject, onLogout }: ProjectHubProps) {
         <div className="mb-8 flex items-center justify-between">
           <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
           <button
-            onClick={onLogout}
+            onClick={() => {
+              logout();
+              navigate('/login');
+            }}
             className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             <LogOut className="mr-2 h-4 w-4" />

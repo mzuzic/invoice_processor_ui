@@ -1,18 +1,21 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { LogOut, Loader2 } from 'lucide-react';
 import { Project } from '../../types';
 import { apiService } from '../../services/api';
 import { StatusBadge } from '../common/StatusBadge';
 import { DraftView } from '../upload/DraftView';
 import { ProcessingView } from '../upload/ProcessingView';
+import { useAuth } from '../../hooks/useAuth';
 
 interface ProjectDetailPageProps {
   projectId: string;
   onBack: () => void;
-  onLogout: () => void;
 }
 
-export function ProjectDetailPage({ projectId, onBack, onLogout }: ProjectDetailPageProps) {
+export function ProjectDetailPage({ projectId, onBack }: ProjectDetailPageProps) {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
@@ -87,7 +90,10 @@ export function ProjectDetailPage({ projectId, onBack, onLogout }: ProjectDetail
               ← Back to Projects
             </button>
             <button
-              onClick={onLogout}
+              onClick={() => {
+                logout();
+                navigate('/login');
+              }}
               className="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
             >
               <LogOut className="mr-2 h-4 w-4" />

@@ -1,6 +1,7 @@
 import { Download } from 'lucide-react';
 import { Project } from '../../types';
 import { StatusBadge } from '../common/StatusBadge';
+import { apiService } from '../../services/api';
 
 interface ProjectCardProps {
   project: Project;
@@ -8,11 +9,15 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ project, onClick }: ProjectCardProps) {
-  const handleDownload = (e: React.MouseEvent) => {
+  const handleDownload = async (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click navigation
-    // Simulated download action
-    console.log(`Downloading results for ${project.reference}`);
-    alert(`Downloading results for ${project.reference}`);
+    
+    try {
+      await apiService.downloadProjectResults(project.id);
+    } catch (error) {
+      console.error('Download failed:', error);
+      alert('Download failed. Please try again.');
+    }
   };
 
   return (

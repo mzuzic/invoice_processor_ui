@@ -1,15 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { User, Lock, Loader2, AlertCircle } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
 
-interface LoginScreenProps {
-  onLogin: (email: string, password: string) => Promise<boolean>;
-}
-
-export function LoginScreen({ onLogin }: LoginScreenProps) {
+export function LoginScreen() {
+  const { isAuthenticated, login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      const from = (location.state as any)?.from?.pathname || '/';
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, location.state]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,10 +26,11 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
     setLoading(true);
 
     try {
-      const success = await onLogin(email, password);
+      const success = await login(email, password);
       if (!success) {
         setError('Please enter both email and password');
       }
+      // Navigation will be handled by the redirect above after state update
     } catch (err) {
       setError('Login failed. Please try again.');
     } finally {

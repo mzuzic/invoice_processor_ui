@@ -1,48 +1,52 @@
-import { useState } from 'react';
-import { useAuth } from './hooks/useAuth';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { LoginScreen } from './components/auth/LoginScreen';
 import { ProjectHub } from './components/projects/ProjectHub';
 import { ProjectDetailPage } from './components/projects/ProjectDetailPage';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
-export default function App() {
-  const { isAuthenticated, login, logout } = useAuth();
-  const [currentPage, setCurrentPage] = useState<'home' | 'project'>('home');
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+function AppRoutes() {
+  const navigate = useNavigate();
 
   const navigateToProject = (projectId: string) => {
-    setSelectedProjectId(projectId);
-    setCurrentPage('project');
+    navigate(`/project/${projectId}`);
   };
 
   const navigateHome = () => {
-    setCurrentPage('home');
-    setSelectedProjectId(null);
+    navigate('/');
   };
-
-  const handleLogout = () => {
-    logout();
-    setCurrentPage('home');
-    setSelectedProjectId(null);
-  };
-
-  if (!isAuthenticated) {
-    return <LoginScreen onLogin={login} />;
-  }
-
-  if (currentPage === 'project' && selectedProjectId) {
-    return (
-      <ProjectDetailPage 
-        projectId={selectedProjectId} 
-        onBack={navigateHome} 
-        onLogout={handleLogout} 
-      />
-    );
-  }
 
   return (
-    <ProjectHub 
-      onNavigateToProject={navigateToProject} 
-      onLogout={handleLogout} 
-    />
+    <Routes>
+      <Route path="/login" element={<LoginScreen />} />
+      <Route path="/" element={
+        <ProtectedRoute>
+          <ProjectHub onNavigateToProject={navigateToProject} />
+        </ProtectedRoute>
+      } />
+      <Route path="/project/:projectId" element={
+        <ProtectedRoute>
+          <ProjectDetailPageWrapper onBack={navigateHome} />
+        </ProtectedRoute>
+      } />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
+function ProjectDetailPageWrapper({ onBack }: { onBack: () => void }) {
+  const { projectId } = useParams<{ projectId: string }>();
+  
+  if (!projectId) {
+    return <Navigate to="/" replace />;
+  }
+  
+  return <ProjectDetailPage projectId={projectId} onBack={onBack} />;
+}
+
+export default function App() {
+  return (
+    <Router>
+      <AppRoutes />
+    </Router>
   );
 }

@@ -10,11 +10,10 @@ export function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {
   const getStatusConfig = (status: string) => {
     switch (status) {
       case 'completed':
-      case 'processed':
         return {
           icon: <CheckCircle className={`${size === 'sm' ? 'h-4 w-4' : 'h-5 w-5'}`} />,
           color: 'bg-green-100 text-green-800',
-          text: status === 'completed' ? 'Completed' : 'Processed'
+          text: 'Completed'
         };
       case 'processing':
         return {
@@ -23,11 +22,16 @@ export function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {
           text: 'Processing'
         };
       case 'draft':
-      case 'queued':
         return {
           icon: <Clock className={`${size === 'sm' ? 'h-4 w-4' : 'h-5 w-5'}`} />,
           color: 'bg-gray-100 text-gray-800',
-          text: status === 'draft' ? 'Draft' : 'Queued'
+          text: 'Draft'
+        };
+      case 'pending':
+        return {
+          icon: <Clock className={`${size === 'sm' ? 'h-4 w-4' : 'h-5 w-5'}`} />,
+          color: 'bg-yellow-100 text-yellow-800',
+          text: 'Pending'
         };
       case 'failed':
         return {
