@@ -10,7 +10,7 @@ export interface Project {
 
 export interface Document {
   id: string;
-  filename: string;
+  file_name: string;
   document_type: string;
   vendor?: string;
   status: 'pending' | 'processing' | 'completed' | 'failed';

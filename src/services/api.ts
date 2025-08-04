@@ -92,7 +92,7 @@ class ApiService {
         created: this.formatDate(order.created_at),
         documents: order.documents?.map((doc: any) => ({
           id: doc.id,
-          filename: doc.filename || doc.reference || `Document ${doc.id.slice(0, 8)}`,
+          file_name: doc.file_name,
           document_type: doc.document_type,
           vendor: doc.vendor,
           status: this.mapDocumentStatus(doc.status),
@@ -130,7 +130,7 @@ class ApiService {
       
       return result.documents_added.map(doc => ({
         id: doc.id,
-        filename: doc.filename || doc.reference || `Document ${doc.id.slice(0, 8)}`,
+        file_name: doc.file_name,
         document_type: doc.document_type,
         vendor: doc.vendor,
         status: this.mapDocumentStatus(doc.status),
