@@ -1,5 +1,4 @@
 import { Project, Document } from '../types';
-import { config } from '../config';
 
 class ApiService {
 
