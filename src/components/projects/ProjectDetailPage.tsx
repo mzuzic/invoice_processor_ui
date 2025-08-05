@@ -26,7 +26,8 @@ export function ProjectDetailPage({ projectId, onBack }: ProjectDetailPageProps)
 
   useEffect(() => {
     if (project?.status === 'processing') {
-      const interval = setInterval(fetchProjectDetails, 3000);
+      // TODO use web sockets for this
+      const interval = setInterval(fetchProjectDetails, 30000); // Poll every 30 seconds
       return () => clearInterval(interval);
     }
   }, [project?.status]);
@@ -53,20 +54,20 @@ export function ProjectDetailPage({ projectId, onBack }: ProjectDetailPageProps)
 
   const handleStartProcessing = async () => {
     if (!project || uploadedFiles.length === 0) return;
-    
+
     try {
       // First upload the files
       console.log('Uploading files...');
       await apiService.uploadFiles(project.id, uploadedFiles);
-      
+
       // Then start processing
       console.log('Starting processing...');
       await apiService.startProcessing(project.id);
-      
+
       // Update project status and clear uploaded files
       setProject({ ...project, status: 'processing' });
       setUploadedFiles([]);
-      
+
       console.log('Processing started successfully');
     } catch (error) {
       console.error('Failed to start processing:', error);
