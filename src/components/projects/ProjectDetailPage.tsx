@@ -76,6 +76,33 @@ export function ProjectDetailPage({ projectId, onBack }: ProjectDetailPageProps)
     }
   };
 
+  const handleDownloadResults = async () => {
+    if (!project) return;
+    
+    try {
+      await apiService.downloadProjectResults(project.id);
+    } catch (error) {
+      console.error('Failed to download results:', error);
+      alert('Failed to download results');
+    }
+  };
+
+  const handleDeleteProject = async () => {
+    if (!project) return;
+    
+    if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      // TODO: Implement delete endpoint when available
+      alert('Delete functionality not yet implemented');
+    } catch (error) {
+      console.error('Failed to delete project:', error);
+      alert('Failed to delete project');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -119,6 +146,34 @@ export function ProjectDetailPage({ projectId, onBack }: ProjectDetailPageProps)
             <StatusBadge status={project.status} />
           </div>
         </div>
+
+        {/* Floating Action Bar - Only shows for completed projects */}
+        {project.status === 'completed' && (
+          <div className="bg-white rounded-lg shadow mb-6">
+            <div className="bg-gray-50 px-6 py-3 border-b border-gray-200 rounded-t-lg">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-700">
+                  {project.documents?.length || 0} {(project.documents?.length || 0) === 1 ? 'document' : 'documents'} processed
+                </span>
+                <div className="flex items-center space-x-2">
+                  <button 
+                    onClick={handleDownloadResults}
+                    className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    Download Results
+                  </button>
+                  <span className="text-gray-300">|</span>
+                  <button 
+                    onClick={handleDeleteProject}
+                    className="text-sm text-red-600 hover:text-red-700 font-medium"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {project.status === 'draft' ? (
           <DraftView
