@@ -231,6 +231,29 @@ class ApiService {
     }
   }
 
+  async deleteProject(projectId: string): Promise<void> {
+    try {
+      const url = `${this.baseUrl}/orders/${projectId}`;
+      console.log('Deleting project with URL:', url);
+      
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Delete failed:', response.status, errorText);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Failed to delete project:', error);
+      throw error;
+    }
+  }
+
   async healthCheck(): Promise<boolean> {
     try {
       const response = await fetch(`${this.baseUrl}/health`);

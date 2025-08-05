@@ -7,6 +7,7 @@ import { StatusBadge } from '../common/StatusBadge';
 import { DraftView } from '../upload/DraftView';
 import { ProcessingView } from '../upload/ProcessingView';
 import { useAuth } from '../../hooks/useAuth';
+import { DeleteModal } from '../common/DeleteModal';
 
 interface ProjectDetailPageProps {
   projectId: string;
@@ -20,6 +21,8 @@ export function ProjectDetailPage({ projectId, onBack }: ProjectDetailPageProps)
   const [loading, setLoading] = useState(true);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchProjectDetails();
@@ -90,16 +93,17 @@ export function ProjectDetailPage({ projectId, onBack }: ProjectDetailPageProps)
   const handleDeleteProject = async () => {
     if (!project) return;
     
-    if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
-      return;
-    }
-    
     try {
-      // TODO: Implement delete endpoint when available
-      alert('Delete functionality not yet implemented');
+      setIsDeleting(true);
+      await apiService.deleteProject(project.id);
+      // Navigate back to projects list after successful deletion
+      onBack();
     } catch (error) {
       console.error('Failed to delete project:', error);
       alert('Failed to delete project');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
     }
   };
 
@@ -147,33 +151,40 @@ export function ProjectDetailPage({ projectId, onBack }: ProjectDetailPageProps)
           </div>
         </div>
 
-        {/* Floating Action Bar - Only shows for completed projects */}
-        {project.status === 'completed' && (
-          <div className="bg-white rounded-lg shadow mb-6">
-            <div className="bg-gray-50 px-6 py-3 border-b border-gray-200 rounded-t-lg">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-700">
-                  {project.documents?.length || 0} {(project.documents?.length || 0) === 1 ? 'document' : 'documents'} processed
-                </span>
-                <div className="flex items-center space-x-2">
-                  <button 
-                    onClick={handleDownloadResults}
-                    className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                  >
-                    Download Results
-                  </button>
-                  <span className="text-gray-300">|</span>
-                  <button 
-                    onClick={handleDeleteProject}
-                    className="text-sm text-red-600 hover:text-red-700 font-medium"
-                  >
-                    Delete
-                  </button>
-                </div>
+        {/* Action Bar - Shows for all projects */}
+        <div className="bg-white rounded-lg shadow mb-6">
+          <div className="bg-gray-50 px-6 py-3 border-b border-gray-200 rounded-t-lg">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-700">
+                {project.status === 'completed' 
+                  ? `${project.documents?.length || 0} ${(project.documents?.length || 0) === 1 ? 'document' : 'documents'} processed`
+                  : project.status === 'processing'
+                  ? `${project.documents?.length || 0} ${(project.documents?.length || 0) === 1 ? 'document' : 'documents'} processing`
+                  : 'Draft project'
+                }
+              </span>
+              <div className="flex items-center space-x-2">
+                {project.status === 'completed' && (
+                  <>
+                    <button 
+                      onClick={handleDownloadResults}
+                      className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    >
+                      Download Results
+                    </button>
+                    <span className="text-gray-300">|</span>
+                  </>
+                )}
+                <button 
+                  onClick={() => setShowDeleteModal(true)}
+                  className="text-sm text-red-600 hover:text-red-700 font-medium"
+                >
+                  Delete
+                </button>
               </div>
             </div>
           </div>
-        )}
+        </div>
 
         {project.status === 'draft' ? (
           <DraftView
@@ -187,6 +198,15 @@ export function ProjectDetailPage({ projectId, onBack }: ProjectDetailPageProps)
           <ProcessingView documents={project.documents || []} />
         )}
       </div>
+
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteProject}
+        title="Delete Project"
+        message={`Are you sure you want to delete "${project.reference}"? This action cannot be undone.`}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }
