@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { Upload, FileText, X } from 'lucide-react';
+import { Upload, FileText, X, Loader2 } from 'lucide-react';
 
 interface DraftViewProps {
   uploadedFiles: File[];
   onFileUpload: (files: FileList) => void;
   onRemoveFile: (index: number) => void;
   onStartProcessing: () => void;
+  isUploading?: boolean;
 }
 
-export function DraftView({ uploadedFiles, onFileUpload, onRemoveFile, onStartProcessing }: DraftViewProps) {
+export function DraftView({ uploadedFiles, onFileUpload, onRemoveFile, onStartProcessing, isUploading = false }: DraftViewProps) {
   const [isDragging, setIsDragging] = useState(false);
 
   const handleDragEnter = (e: React.DragEvent) => {
@@ -86,14 +87,21 @@ export function DraftView({ uploadedFiles, onFileUpload, onRemoveFile, onStartPr
       <div className="mt-6">
         <button
           onClick={onStartProcessing}
-          disabled={uploadedFiles.length === 0}
-          className={`w-full py-3 px-4 rounded-md font-medium ${
-            uploadedFiles.length > 0
+          disabled={uploadedFiles.length === 0 || isUploading}
+          className={`w-full py-3 px-4 rounded-md font-medium flex items-center justify-center ${
+            uploadedFiles.length > 0 && !isUploading
               ? 'bg-blue-600 text-white hover:bg-blue-700'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
         >
-          Start Processing
+          {isUploading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Uploading & Processing...
+            </>
+          ) : (
+            'Start Processing'
+          )}
         </button>
       </div>
     </div>
