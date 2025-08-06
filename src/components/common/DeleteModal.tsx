@@ -1,4 +1,4 @@
-import { X, AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 
 interface DeleteModalProps {
   isOpen: boolean;
