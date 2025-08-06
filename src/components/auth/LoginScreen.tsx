@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { User, Lock, Loader2, AlertCircle } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../contexts/AuthContext';
 
 export function LoginScreen() {
   const { isAuthenticated, login } = useAuth();
@@ -26,13 +26,10 @@ export function LoginScreen() {
     setLoading(true);
 
     try {
-      const success = await login(email, password);
-      if (!success) {
-        setError('Please enter both email and password');
-      }
+      await login({ email, password });
       // Navigation will be handled by the redirect above after state update
-    } catch (err) {
-      setError('Login failed. Please try again.');
+    } catch (err: any) {
+      setError(err.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }

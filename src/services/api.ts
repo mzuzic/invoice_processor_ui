@@ -9,13 +9,76 @@ import {
   ProcessOrderResponse
 } from '../types';
 import { config } from '../config';
+import { AuthService } from './authService';
 
 class ApiService {
   private baseUrl = config.apiUrl;
 
+  private async getAuthHeaders(): Promise<Record<string, string>> {
+    const token = await AuthService.getAccessToken();
+    const headers: Record<string, string> = {
+      'Accept': 'application/json',
+    };
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    return headers;
+  }
+
+  private async makeAuthenticatedRequest(url: string, options: RequestInit = {}): Promise<Response> {
+    const authHeaders = await this.getAuthHeaders();
+    
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...authHeaders,
+        ...options.headers,
+      },
+    });
+
+    // Handle 401 errors (token expired)
+    if (response.status === 401) {
+      try {
+        // Try to refresh token
+        await AuthService.refreshToken();
+        
+        // Retry with new token
+        const newAuthHeaders = await this.getAuthHeaders();
+        const retryResponse = await fetch(url, {
+          ...options,
+          headers: {
+            ...newAuthHeaders,
+            ...options.headers,
+          },
+        });
+
+        if (retryResponse.status === 401) {
+          // Refresh failed - redirect to login
+          AuthService.logout();
+          throw new Error('Authentication failed');
+        }
+
+        return retryResponse;
+      } catch (error) {
+        // Refresh failed - redirect to login
+        AuthService.logout();
+        throw new Error('Authentication failed');
+      }
+    }
+
+    // Handle 403 errors (insufficient permissions)
+    if (response.status === 403) {
+      throw new Error('Insufficient permissions');
+    }
+
+    return response;
+  }
+
   async fetchProjects(): Promise<Project[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/orders`);
+      const response = await this.makeAuthenticatedRequest(`${this.baseUrl}/orders`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -47,7 +110,7 @@ class ApiService {
         ...(notes && { notes })
       };
 
-      const response = await fetch(`${this.baseUrl}/orders`, {
+      const response = await this.makeAuthenticatedRequest(`${this.baseUrl}/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -77,7 +140,7 @@ class ApiService {
 
   async fetchProjectDetails(projectId: string): Promise<Project> {
     try {
-      const response = await fetch(`${this.baseUrl}/orders/${projectId}`);
+      const response = await this.makeAuthenticatedRequest(`${this.baseUrl}/orders/${projectId}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -114,11 +177,8 @@ class ApiService {
         formData.append('files', file);
       });
 
-      const response = await fetch(`${this.baseUrl}/orders/${projectId}/documents`, {
+      const response = await this.makeAuthenticatedRequest(`${this.baseUrl}/orders/${projectId}/documents`, {
         method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-        },
         body: formData,
       });
 
@@ -152,7 +212,7 @@ class ApiService {
         }
       };
 
-      const response = await fetch(`${this.baseUrl}/orders/${projectId}/process`, {
+      const response = await this.makeAuthenticatedRequest(`${this.baseUrl}/orders/${projectId}/process`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -173,7 +233,7 @@ class ApiService {
 
   async checkJobStatus(jobId: string): Promise<Job> {
     try {
-      const response = await fetch(`${this.baseUrl}/jobs/${jobId}`);
+      const response = await this.makeAuthenticatedRequest(`${this.baseUrl}/jobs/${jobId}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -187,7 +247,7 @@ class ApiService {
 
   async downloadResults(jobId: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/jobs/${jobId}/download/excel`);
+      const response = await this.makeAuthenticatedRequest(`${this.baseUrl}/jobs/${jobId}/download/excel`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -210,7 +270,7 @@ class ApiService {
 
   async downloadProjectResults(projectId: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/orders/${projectId}/download`);
+      const response = await this.makeAuthenticatedRequest(`${this.baseUrl}/orders/${projectId}/download`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -236,11 +296,8 @@ class ApiService {
       const url = `${this.baseUrl}/orders/${projectId}`;
       console.log('Deleting project with URL:', url);
       
-      const response = await fetch(url, {
+      const response = await this.makeAuthenticatedRequest(url, {
         method: 'DELETE',
-        headers: {
-          'Accept': 'application/json',
-        },
       });
 
       if (!response.ok) {

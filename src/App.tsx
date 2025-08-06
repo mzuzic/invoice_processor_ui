@@ -3,6 +3,7 @@ import { LoginScreen } from './components/auth/LoginScreen';
 import { ProjectHub } from './components/projects/ProjectHub';
 import { ProjectDetailPage } from './components/projects/ProjectDetailPage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { AuthProvider } from './contexts/AuthContext';
 
 function AppRoutes() {
   const navigate = useNavigate();
@@ -46,7 +47,9 @@ function ProjectDetailPageWrapper({ onBack }: { onBack: () => void }) {
 export default function App() {
   return (
     <Router>
-      <AppRoutes />
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
     </Router>
   );
 }

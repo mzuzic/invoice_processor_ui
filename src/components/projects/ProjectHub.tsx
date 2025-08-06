@@ -1,19 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Plus, Loader2, LogOut } from 'lucide-react';
 import { Project } from '../../types';
 import { apiService } from '../../services/api';
 import { ProjectCard } from './ProjectCard';
 import { CreateProjectModal } from './CreateProjectModal';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface ProjectHubProps {
   onNavigateToProject: (projectId: string) => void;
 }
 
 export function ProjectHub({ onNavigateToProject }: ProjectHubProps) {
-  const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -48,12 +46,16 @@ export function ProjectHub({ onNavigateToProject }: ProjectHubProps) {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8 flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
+            {user && (
+              <p className="mt-1 text-sm text-gray-600">
+                Welcome back, {user.name} ({user.role})
+              </p>
+            )}
+          </div>
           <button
-            onClick={() => {
-              logout();
-              navigate('/login');
-            }}
+            onClick={logout}
             className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             <LogOut className="mr-2 h-4 w-4" />
