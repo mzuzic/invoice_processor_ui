@@ -50,7 +50,7 @@ export function ProjectHub({ onNavigateToProject }: ProjectHubProps) {
             <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
             {user && (
               <p className="mt-1 text-sm text-gray-600">
-                Welcome back, {user.name} ({user.role})
+                Welcome back, {user.name}
               </p>
             )}
           </div>
