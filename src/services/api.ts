@@ -1,6 +1,6 @@
-import { 
-  Project, 
-  Document, 
+import {
+  Project,
+  Document,
   Job,
   CreateOrderRequest,
   CreateOrderResponse,
@@ -19,17 +19,17 @@ class ApiService {
     const headers: Record<string, string> = {
       'Accept': 'application/json',
     };
-    
+
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
-    
+
     return headers;
   }
 
   private async makeAuthenticatedRequest(url: string, options: RequestInit = {}): Promise<Response> {
     const authHeaders = await this.getAuthHeaders();
-    
+
     const response = await fetch(url, {
       ...options,
       headers: {
@@ -43,7 +43,7 @@ class ApiService {
       try {
         // Try to refresh token
         await AuthService.refreshToken();
-        
+
         // Retry with new token
         const newAuthHeaders = await this.getAuthHeaders();
         const retryResponse = await fetch(url, {
@@ -83,10 +83,10 @@ class ApiService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const result = await response.json();
-      
+
       // Handle paginated response structure
       const orders = result.data || [];
-      
+
       // Transform API response to match our Project interface
       return orders.map((order: any) => ({
         id: order.id,
@@ -123,7 +123,7 @@ class ApiService {
       }
 
       const order: CreateOrderResponse = await response.json();
-      
+
       return {
         id: order.id,
         reference: order.reference,
@@ -144,9 +144,9 @@ class ApiService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const order = await response.json();
-      
+
       return {
         id: order.id,
         reference: order.reference,
@@ -172,7 +172,7 @@ class ApiService {
   async uploadFiles(projectId: string, files: File[]): Promise<Document[]> {
     try {
       const formData = new FormData();
-      
+
       files.forEach((file) => {
         formData.append('files', file);
       });
@@ -187,7 +187,7 @@ class ApiService {
       }
 
       const result: UploadDocumentsResponse = await response.json();
-      
+
       return result.documents_added.map(doc => ({
         id: doc.id,
         file_name: doc.file_name,
@@ -237,7 +237,7 @@ class ApiService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       return await response.json();
     } catch (error) {
       console.error('Failed to check job status:', error);
@@ -251,7 +251,7 @@ class ApiService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -274,7 +274,7 @@ class ApiService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -294,8 +294,7 @@ class ApiService {
   async deleteProject(projectId: string): Promise<void> {
     try {
       const url = `${this.baseUrl}/orders/${projectId}`;
-      console.log('Deleting project with URL:', url);
-      
+
       const response = await this.makeAuthenticatedRequest(url, {
         method: 'DELETE',
       });
@@ -359,7 +358,7 @@ class ApiService {
 
   private formatDate(dateString: string): string {
     if (!dateString) return 'Unknown';
-    
+
     try {
       const date = new Date(dateString);
       const now = new Date();
