@@ -6,7 +6,7 @@ import { apiService } from '../../services/api';
 import { StatusBadge } from '../common/StatusBadge';
 import { DraftView } from '../upload/DraftView';
 import { ProcessingView } from '../upload/ProcessingView';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../contexts/AuthContext';
 import { DeleteModal } from '../common/DeleteModal';
 
 interface ProjectDetailPageProps {

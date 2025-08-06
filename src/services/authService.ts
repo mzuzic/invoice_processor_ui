@@ -4,6 +4,8 @@ import { config } from '../config';
 export class AuthService {
   private static readonly STORAGE_KEY = 'invoice_auth';
   private static readonly API_BASE = config.apiUrl;
+  private static refreshPromise: Promise<AuthTokens> | null = null;
+  private static refreshTimer: number | null = null;
 
   // Store auth data
   static setAuth(authData: AuthTokens): void {
@@ -62,8 +64,27 @@ export class AuthService {
     return authData;
   }
 
-  // Refresh tokens
+  // Refresh tokens with mutex to prevent concurrent calls
   static async refreshToken(): Promise<AuthTokens> {
+    // If a refresh is already in progress, return that promise
+    if (this.refreshPromise) {
+      return this.refreshPromise;
+    }
+
+    // Start a new refresh and store the promise
+    this.refreshPromise = this.doActualRefresh();
+    
+    try {
+      const result = await this.refreshPromise;
+      return result;
+    } finally {
+      // Clear the promise when done (success or failure)
+      this.refreshPromise = null;
+    }
+  }
+
+  // The actual refresh implementation
+  private static async doActualRefresh(): Promise<AuthTokens> {
     const auth = this.getAuth();
     if (!auth) throw new Error('No refresh token available');
 
@@ -102,8 +123,38 @@ export class AuthService {
     return auth?.access_token || null;
   }
 
+  // Get current access token (pure cached access, no refresh logic)
+  static getCurrentAccessToken(): string | null {
+    const auth = this.getAuth();
+    return auth?.access_token || null;
+  }
+
+  // Start background refresh timer
+  static startBackgroundRefresh(): void {
+    // Clear any existing timer
+    this.stopBackgroundRefresh();
+    
+    // Check every 5 minutes for refresh need
+    this.refreshTimer = setInterval(() => {
+      if (this.isAuthenticated() && this.needsRefresh()) {
+        this.refreshToken().catch(() => {
+          console.error('Background token refresh failed');
+        });
+      }
+    }, 5 * 60 * 1000); // Every 5 minutes
+  }
+  
+  // Stop background refresh timer
+  static stopBackgroundRefresh(): void {
+    if (this.refreshTimer) {
+      clearInterval(this.refreshTimer);
+      this.refreshTimer = null;
+    }
+  }
+
   // Logout
   static logout(): void {
+    this.stopBackgroundRefresh();
     this.clearAuth();
     window.location.href = '/login';
   }

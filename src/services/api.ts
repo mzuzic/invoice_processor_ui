@@ -14,8 +14,12 @@ import { AuthService } from './authService';
 class ApiService {
   private baseUrl = config.apiUrl;
 
-  private async getAuthHeaders(): Promise<Record<string, string>> {
-    const token = await AuthService.getAccessToken();
+
+  private async getAuthHeaders(forceRefresh = false): Promise<Record<string, string>> {
+    const token = forceRefresh 
+      ? await AuthService.getAccessToken() 
+      : AuthService.getCurrentAccessToken();
+      
     const headers: Record<string, string> = {
       'Accept': 'application/json',
     };
@@ -28,7 +32,8 @@ class ApiService {
   }
 
   private async makeAuthenticatedRequest(url: string, options: RequestInit = {}): Promise<Response> {
-    const authHeaders = await this.getAuthHeaders();
+    // First attempt: use current token WITHOUT proactive refresh check
+    const authHeaders = await this.getAuthHeaders(false);
 
     const response = await fetch(url, {
       ...options,
@@ -44,8 +49,8 @@ class ApiService {
         // Try to refresh token
         await AuthService.refreshToken();
 
-        // Retry with new token
-        const newAuthHeaders = await this.getAuthHeaders();
+        // Retry with new token (force refresh check)
+        const newAuthHeaders = await this.getAuthHeaders(true);
         const retryResponse = await fetch(url, {
           ...options,
           headers: {

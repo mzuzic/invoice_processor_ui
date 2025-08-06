@@ -26,6 +26,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const auth = AuthService.getAuth();
       if (auth && AuthService.isAuthenticated()) {
         setUser(auth.user);
+        // Start background refresh for existing session
+        AuthService.startBackgroundRefresh();
       }
       setLoading(false);
     };
@@ -37,15 +39,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const authData = await AuthService.login(credentials);
       setUser(authData.user);
+      // Start background refresh timer after successful login
+      AuthService.startBackgroundRefresh();
     } catch (error) {
       throw error;
     }
   };
 
   const logout = () => {
-    AuthService.clearAuth();
+    AuthService.logout(); // This will handle stopping timer and clearing auth
     setUser(null);
-    window.location.href = '/login';
   };
 
   const value = {
