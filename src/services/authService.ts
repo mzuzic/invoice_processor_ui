@@ -1,8 +1,9 @@
 import { AuthTokens, LoginRequest } from '../types/auth';
+import { config } from '../config';
 
 export class AuthService {
   private static readonly STORAGE_KEY = 'invoice_auth';
-  private static readonly API_BASE = 'http://localhost:8001';
+  private static readonly API_BASE = config.apiUrl;
 
   // Store auth data
   static setAuth(authData: AuthTokens): void {
