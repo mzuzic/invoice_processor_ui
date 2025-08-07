@@ -35,7 +35,7 @@ export function UploadTest() {
       console.log('Uploading file:', file.name, 'to order:', orderId);
       const documents = await apiService.uploadFiles(orderId, [file]);
       setResult(`✅ Upload successful! Documents: ${JSON.stringify(documents, null, 2)}`);
-      
+
       // Check order status after upload
       setTimeout(async () => {
         try {
@@ -45,7 +45,7 @@ export function UploadTest() {
           setResult(prev => prev + `\n\n❌ Failed to check order: ${error}`);
         }
       }, 1000);
-      
+
     } catch (error) {
       console.error('Upload error:', error);
       setResult(`❌ Upload failed: ${error}`);
@@ -65,7 +65,7 @@ export function UploadTest() {
   return (
     <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
       <h3 className="font-bold mb-4 text-yellow-800">🧪 Upload Test Panel</h3>
-      
+
       <div className="space-y-3">
         <button
           onClick={createTestOrder}
@@ -74,16 +74,16 @@ export function UploadTest() {
         >
           1. Create Test Order
         </button>
-        
+
         <div>
           <input
             type="file"
             onChange={handleFileChange}
-            accept=".pdf,.jpg,.png,.jpeg"
+            accept=".pdf,.jpg,.png,.jpeg,.xlsx,.xls,.csv"
             className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
           />
         </div>
-        
+
         <button
           onClick={testUpload}
           disabled={loading || !orderId || !file}
@@ -92,14 +92,14 @@ export function UploadTest() {
           2. Test Upload
         </button>
       </div>
-      
+
       <div className="mt-4 p-3 bg-white rounded border">
         <h4 className="font-semibold mb-2">Result:</h4>
         <pre className="text-xs whitespace-pre-wrap max-h-60 overflow-auto">
           {loading ? 'Loading...' : result || 'No test run yet'}
         </pre>
       </div>
-      
+
       {orderId && (
         <div className="mt-2 text-xs text-gray-600">
           Current Order ID: {orderId}
