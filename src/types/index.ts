@@ -1,7 +1,7 @@
 export interface Project {
   id: string;
   reference: string;
-  status: 'draft' | 'processing' | 'completed';
+  status: 'draft' | 'processing' | 'completed' | 'failed';
   documentCount: number;
   created: string;
   documents?: Document[];
