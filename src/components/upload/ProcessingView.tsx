@@ -3,9 +3,10 @@ import { StatusBadge } from '../common/StatusBadge';
 
 interface ProcessingViewProps {
   documents: Document[];
+  downloadButton?: React.ReactNode;
 }
 
-export function ProcessingView({ documents }: ProcessingViewProps) {
+export function ProcessingView({ documents, downloadButton }: ProcessingViewProps) {
   return (
     <div className="bg-white shadow rounded-lg overflow-hidden">
       <table className="min-w-full divide-y divide-gray-200">
@@ -47,6 +48,11 @@ export function ProcessingView({ documents }: ProcessingViewProps) {
           ))}
         </tbody>
       </table>
+      {downloadButton && (
+        <div className="p-4 border-t border-gray-200 flex justify-end">
+          {downloadButton}
+        </div>
+      )}
     </div>
   );
 }

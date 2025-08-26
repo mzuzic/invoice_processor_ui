@@ -61,7 +61,7 @@ export function ProjectDetailPage({ projectId, onBack }: ProjectDetailPageProps)
 
     try {
       setIsUploading(true);
-      
+
       // First upload the files
       await apiService.uploadFiles(project.id, uploadedFiles);
 
@@ -81,7 +81,7 @@ export function ProjectDetailPage({ projectId, onBack }: ProjectDetailPageProps)
 
   const handleDownloadResults = async () => {
     if (!project) return;
-    
+
     try {
       await apiService.downloadProjectResults(project.id);
     } catch (error) {
@@ -92,7 +92,7 @@ export function ProjectDetailPage({ projectId, onBack }: ProjectDetailPageProps)
 
   const handleDeleteProject = async () => {
     if (!project) return;
-    
+
     try {
       setIsDeleting(true);
       await apiService.deleteProject(project.id);
@@ -156,26 +156,15 @@ export function ProjectDetailPage({ projectId, onBack }: ProjectDetailPageProps)
           <div className="bg-gray-50 px-6 py-3 border-b border-gray-200 rounded-t-lg">
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-700">
-                {project.status === 'completed' 
+                {project.status === 'completed'
                   ? `${project.documents?.length || 0} ${(project.documents?.length || 0) === 1 ? 'document' : 'documents'} processed`
                   : project.status === 'processing'
-                  ? `${project.documents?.length || 0} ${(project.documents?.length || 0) === 1 ? 'document' : 'documents'} processing`
-                  : 'Draft project'
+                    ? `${project.documents?.length || 0} ${(project.documents?.length || 0) === 1 ? 'document' : 'documents'} processing`
+                    : 'Draft project'
                 }
               </span>
               <div className="flex items-center space-x-2">
-                {project.status === 'completed' && (
-                  <>
-                    <button 
-                      onClick={handleDownloadResults}
-                      className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                    >
-                      Download Results
-                    </button>
-                    <span className="text-gray-300">|</span>
-                  </>
-                )}
-                <button 
+                <button
                   onClick={() => setShowDeleteModal(true)}
                   className="text-sm text-red-600 hover:text-red-700 font-medium"
                 >
@@ -195,7 +184,17 @@ export function ProjectDetailPage({ projectId, onBack }: ProjectDetailPageProps)
             isUploading={isUploading}
           />
         ) : (
-          <ProcessingView documents={project.documents || []} />
+          <ProcessingView
+            documents={project.documents || []}
+            downloadButton={project.status === 'completed' ? (
+              <button
+                onClick={handleDownloadResults}
+                className="py-2 px-3 rounded-md font-medium flex items-center justify-center bg-blue-600 text-white hover:bg-blue-700"
+              >
+                Download Results
+              </button>
+            ) : undefined}
+          />
         )}
       </div>
 
