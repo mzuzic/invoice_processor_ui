@@ -160,7 +160,9 @@ export function ProjectDetailPage({ projectId, onBack }: ProjectDetailPageProps)
                   ? `${project.documents?.length || 0} ${(project.documents?.length || 0) === 1 ? 'document' : 'documents'} processed`
                   : project.status === 'processing'
                     ? `${project.documents?.length || 0} ${(project.documents?.length || 0) === 1 ? 'document' : 'documents'} processing`
-                    : 'Draft project'
+                    : project.status === 'failed'
+                      ? `${project.documents?.length || 0} ${(project.documents?.length || 0) === 1 ? 'document' : 'documents'} failed`
+                      : 'Draft project'
                 }
               </span>
               <div className="flex items-center space-x-2">

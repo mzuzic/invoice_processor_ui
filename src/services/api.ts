@@ -326,7 +326,7 @@ class ApiService {
   }
 
   // Helper methods
-  private mapOrderStatus(apiStatus: string): 'draft' | 'processing' | 'completed' {
+  private mapOrderStatus(apiStatus: string): 'draft' | 'processing' | 'completed' | 'failed' {
     switch (apiStatus?.toLowerCase()) {
       case 'draft':
         return 'draft';
@@ -336,6 +336,9 @@ class ApiService {
       case 'completed':
       case 'finished':
         return 'completed';
+      case 'failed':
+      case 'error':
+        return 'failed';
       default:
         return 'draft';
     }
