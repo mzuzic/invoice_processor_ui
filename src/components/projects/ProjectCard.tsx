@@ -31,7 +31,7 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
           <StatusBadge status={project.status} size="sm" />
         </div>
         <div className="text-sm text-gray-500">
-          <p>{project.documentCount} documents</p>
+          <p>{project.documentCount} {project.documentCount === 1 ? 'document' : 'documents'}</p>
           <p>Created: {project.created}</p>
         </div>
         {project.status === 'completed' && (
