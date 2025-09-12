@@ -296,6 +296,48 @@ class ApiService {
     }
   }
 
+  async updateProject(projectId: string, reference: string): Promise<Project> {
+    try {
+      const requestBody = {
+        reference: reference
+      };
+
+      const response = await this.makeAuthenticatedRequest(`${this.baseUrl}/orders/${projectId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const order = await response.json();
+
+      return {
+        id: order.id,
+        reference: order.reference,
+        status: this.mapOrderStatus(order.status),
+        documentCount: order.documents?.length || 0,
+        created: this.formatDate(order.created_at),
+        documents: order.documents?.map((doc: any) => ({
+          id: doc.id,
+          file_name: doc.file_name,
+          document_type: doc.document_type,
+          vendor: doc.vendor,
+          status: this.mapDocumentStatus(doc.status),
+          job_id: doc.job_id
+        })) || [],
+        notes: order.notes
+      };
+    } catch (error) {
+      console.error('Failed to update project:', error);
+      throw error;
+    }
+  }
+
   async deleteProject(projectId: string): Promise<void> {
     try {
       const url = `${this.baseUrl}/orders/${projectId}`;

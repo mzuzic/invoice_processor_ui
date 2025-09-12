@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Loader2 } from 'lucide-react';
+import { LogOut, Loader2, Edit, Check, X } from 'lucide-react';
 import { Project } from '../../types';
 import { apiService } from '../../services/api';
 import { StatusBadge } from '../common/StatusBadge';
@@ -23,6 +23,9 @@ export function ProjectDetailPage({ projectId, onBack }: ProjectDetailPageProps)
   const [isUploading, setIsUploading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState('');
+  const [isUpdatingName, setIsUpdatingName] = useState(false);
 
   useEffect(() => {
     fetchProjectDetails();
@@ -107,6 +110,44 @@ export function ProjectDetailPage({ projectId, onBack }: ProjectDetailPageProps)
     }
   };
 
+  const handleStartEditing = () => {
+    if (!project) return;
+    setEditedName(project.reference);
+    setIsEditingName(true);
+  };
+
+  const handleSaveName = async () => {
+    if (!project || !editedName.trim() || editedName === project.reference) {
+      setIsEditingName(false);
+      return;
+    }
+
+    try {
+      setIsUpdatingName(true);
+      const updatedProject = await apiService.updateProject(project.id, editedName.trim());
+      setProject(updatedProject);
+      setIsEditingName(false);
+    } catch (error) {
+      console.error('Failed to update project name:', error);
+      alert('Failed to update project name');
+    } finally {
+      setIsUpdatingName(false);
+    }
+  };
+
+  const handleCancelEditing = () => {
+    setIsEditingName(false);
+    setEditedName('');
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSaveName();
+    } else if (e.key === 'Escape') {
+      handleCancelEditing();
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -146,7 +187,51 @@ export function ProjectDetailPage({ projectId, onBack }: ProjectDetailPageProps)
             </button>
           </div>
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-gray-900">{project.reference}</h1>
+            <div className="flex items-center space-x-2">
+              {isEditingName ? (
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={editedName}
+                    onChange={(e) => setEditedName(e.target.value)}
+                    onKeyDown={handleKeyPress}
+                    className="text-3xl font-bold text-gray-900 bg-transparent border-b-2 border-blue-500 focus:outline-none focus:border-blue-600 px-2 py-1 min-w-0 flex-1"
+                    style={{ width: `${Math.max(editedName.length * 0.6, 10)}ch` }}
+                    autoFocus
+                    maxLength={255}
+                  />
+                  <button
+                    onClick={handleSaveName}
+                    disabled={isUpdatingName}
+                    className="p-1 text-green-600 hover:text-green-700 disabled:opacity-50"
+                  >
+                    {isUpdatingName ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Check className="h-4 w-4" />
+                    )}
+                  </button>
+                  <button
+                    onClick={handleCancelEditing}
+                    disabled={isUpdatingName}
+                    className="p-1 text-red-600 hover:text-red-700 disabled:opacity-50"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <h1 className="text-3xl font-bold text-gray-900">{project.reference}</h1>
+                  <button
+                    onClick={handleStartEditing}
+                    className="p-1 text-gray-400 hover:text-gray-600"
+                    title="Edit project name"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+            </div>
             <StatusBadge status={project.status} />
           </div>
         </div>
